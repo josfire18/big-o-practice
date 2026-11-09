@@ -2,92 +2,175 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Big O Practice</title>
+<meta name="description" content="A game for practicing Big O notation with real Python and C# snippets.">
 <style>
 :root{
-  --bg:#f7f7f5;--card:#fff;--text:#1d1d1f;--muted:#6b6b70;--border:#e3e3e0;
-  --accent:#3b5bdb;--accentbg:#eef1fd;--good:#2b8a3e;--goodbg:#e6f4ea;--bad:#c92a2a;--badbg:#fdecec;
-  --code:#f1f1ee;--kw:#7b3fbf;--num:#b35c00;
+  --bg:#f4f5f8;--card:#fff;--text:#1a1c22;--muted:#6a6f7b;--border:#e1e3e9;
+  --accent:#4c5fd5;--accentbg:#eceffd;--good:#23883a;--goodbg:#e4f4e8;--bad:#cc2f2f;--badbg:#fdeaea;
+  --gold:#d99a00;--code:#f0f1f4;--kw:#7b3fbf;--num:#b35c00;
 }
 @media (prefers-color-scheme: dark){
   :root{
-    --bg:#141416;--card:#1e1e21;--text:#ececee;--muted:#9a9aa0;--border:#2e2e33;
-    --accent:#8ea0ff;--accentbg:#252a45;--good:#69db7c;--goodbg:#1c3324;--bad:#ff8787;--badbg:#3a1e1e;
-    --code:#18181b;--kw:#c79bff;--num:#ffb86b;
+    --bg:#121318;--card:#1c1e25;--text:#eceef3;--muted:#9aa0ad;--border:#2c2f39;
+    --accent:#8c9bff;--accentbg:#262b48;--good:#6bd98a;--goodbg:#1b3324;--bad:#ff8a8a;--badbg:#3b1f22;
+    --gold:#ffc94d;--code:#16171c;--kw:#c79bff;--num:#ffb86b;
   }
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
-.wrap{max-width:720px;margin:0 auto;padding:16px}
-h1{font-size:22px;margin:4px 0 12px}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
+.wrap{max-width:720px;margin:0 auto;padding:12px 16px calc(32px + env(safe-area-inset-bottom,0px))}
+button{font:inherit;color:inherit}
 h2{font-size:18px;margin:0 0 10px}
-nav{display:flex;gap:6px;overflow-x:auto;margin-bottom:14px}
-nav button,.chip{border:1px solid var(--border);background:var(--card);color:var(--text);padding:7px 12px;border-radius:999px;font-size:14px;white-space:nowrap;cursor:pointer}
+.top{display:flex;align-items:center;gap:12px;margin:6px 0 12px}
+.top h1{font-size:20px;margin:0;white-space:nowrap}
+.lvl{flex:1;min-width:0}
+.lvl .t{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar{height:8px;background:var(--border);border-radius:99px;overflow:hidden;margin-top:3px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--gold));border-radius:99px;transition:width .5s}
+.lvl small{font-size:11px;color:var(--muted)}
+.iconbtn{background:var(--card);border:1px solid var(--border);border-radius:10px;width:40px;height:40px;font-size:18px;cursor:pointer}
+nav{display:flex;gap:6px;margin-bottom:14px}
+nav button,.chip{border:1px solid var(--border);background:var(--card);padding:7px 14px;border-radius:999px;font-size:14px;white-space:nowrap;cursor:pointer}
 nav button.on,.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
-.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px}
-.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px;position:relative}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
 .chip{padding:5px 11px;font-size:13px}
-.stats{display:flex;gap:16px;font-size:14px;color:var(--muted);margin-bottom:12px;flex-wrap:wrap;align-items:center}
-.stats b{color:var(--text)}
-.link{background:none;border:none;color:var(--accent);font-size:13px;cursor:pointer;padding:0}
-.meta{display:flex;gap:8px;font-size:12px;color:var(--muted);margin-bottom:8px}
+.hide{display:none!important}
+.muted{color:var(--muted)}
+
+/* menu */
+.modes{display:grid;gap:10px}
+.mode{display:grid;grid-template-columns:46px 1fr auto;align-items:center;gap:12px;text-align:left;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;cursor:pointer;transition:transform .1s,border-color .15s}
+.mode:active{transform:scale(.98)}
+.mode:hover{border-color:var(--accent)}
+.mode:disabled{opacity:.6;cursor:default}
+.mode .ico{font-size:28px;text-align:center}
+.mode b{display:block;font-size:17px}
+.mode span.d{display:block;font-size:14px;color:var(--muted)}
+.mode .best{font-size:12px;color:var(--gold);font-weight:700;text-align:right;white-space:nowrap}
+
+/* hud */
+.hud{display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.hud .sp{flex:1}
+.hud .score{font-size:22px;font-weight:800}
+.hud .combo{font-weight:800;color:var(--gold)}
+.hud .pill{background:var(--card);border:1px solid var(--border);border-radius:99px;padding:3px 10px;font-size:14px;font-weight:600}
+.hud .hearts{font-size:20px;letter-spacing:2px}
+.link{background:none;border:none;color:var(--accent);font-size:14px;cursor:pointer;padding:0}
+.tbar{height:6px;background:var(--border);border-radius:99px;overflow:hidden;margin:-4px 0 12px}
+.tbar i{display:block;height:100%;background:var(--accent);transition:width .1s linear}
+.tbar i.low{background:var(--bad)}
+.subhud{margin:-2px 0 12px}
+
+/* question */
+.meta{display:flex;gap:6px;font-size:12px;color:var(--muted);margin-bottom:8px;flex-wrap:wrap}
 .tag{background:var(--code);border:1px solid var(--border);border-radius:6px;padding:1px 7px}
+.tag.fresh{color:var(--accent);border-color:var(--accent)}
 .code{background:var(--code);border:1px solid var(--border);border-radius:10px;padding:10px 0;overflow-x:auto;font:14px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-.row{display:flex;align-items:center;gap:10px;padding:0 12px;min-height:24px}
+.row{display:flex;align-items:center;gap:10px;padding:0 12px;min-height:22px}
 .row.lit{background:var(--accentbg)}
 .line{white-space:pre;flex:1}
 .cost{font:12px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--accent);background:var(--accentbg);border-radius:6px;padding:1px 7px;white-space:nowrap}
 .kw{color:var(--kw);font-weight:600}.num{color:var(--num)}
 .prompt{margin:14px 0 8px;font-weight:600}
 .choices{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.choices button{border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:10px;padding:11px 4px;font-size:15px;cursor:pointer}
+.choices button{border:1px solid var(--border);background:var(--card);border-radius:12px;padding:12px 2px;font-size:15px;cursor:pointer;transition:transform .08s}
+.choices button:active{transform:scale(.96)}
 .choices button.right{background:var(--goodbg);border-color:var(--good);color:var(--good);font-weight:700}
 .choices button.wrong{background:var(--badbg);border-color:var(--bad);color:var(--bad)}
 .choices button:disabled{cursor:default}
 .actions{display:flex;gap:8px;margin-top:12px}
-.btn{border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:10px;padding:9px 14px;font-size:15px;cursor:pointer}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn{border:1px solid var(--border);background:var(--card);border-radius:12px;padding:10px 16px;font-size:15px;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
 .btn:disabled{opacity:.45;cursor:default}
-.fb{margin-top:14px;border-radius:10px;padding:12px 14px}
+.fb{margin-top:14px;border-radius:12px;padding:12px 14px}
 .fb.good{background:var(--goodbg)}.fb.bad{background:var(--badbg)}
 .verdict{font-weight:700;margin-bottom:6px}
 .eq{font:14px/1.7 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;margin:6px 0}
-.muted{color:var(--muted)}
+.fb ul{margin:6px 0 0;padding-left:18px}
+code.i,td code,p code,li code{font:13px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--code);padding:1px 4px;border-radius:4px}
+
+/* end screen */
+.endc{text-align:center}
+.endc .ico{font-size:44px}
+.endc .big{font-size:40px;font-weight:800;margin:4px 0}
+.endc .newbest{color:var(--gold);font-weight:800}
+.endc .actions{justify-content:center}
+.statrow{display:flex;justify-content:center;gap:20px;margin:10px 0;color:var(--muted);font-size:14px}
+.statrow b{display:block;color:var(--text);font-size:18px}
+
+/* badges */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.badge{border:1px solid var(--border);border-radius:12px;padding:10px;font-size:13px}
+.badge b{display:block;font-size:14px}
+.badge.locked{opacity:.4;filter:grayscale(1)}
+.badge .e{font-size:22px}
+.profile{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.profile div{background:var(--code);border-radius:10px;padding:8px 4px;font-size:12px;color:var(--muted)}
+.profile b{display:block;font-size:18px;color:var(--text)}
+
+/* learn */
 ol.rules{padding-left:20px;margin:0}
 ol.rules li{margin-bottom:12px}
 table{width:100%;border-collapse:collapse;font-size:14px}
 th,td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--border);vertical-align:top}
 th{color:var(--muted);font-weight:600;font-size:13px}
-td code,p code,li code{font:13px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--code);padding:1px 4px;border-radius:4px}
+.cheat{font-size:13px}.cheat td,.cheat th{padding:6px 4px}.cheat td code{font-size:12px;word-break:break-word}
 .ctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
 select,input{font-size:15px;padding:7px 9px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text)}
 input{width:120px}
 .seq{font:13px/1.7 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;word-break:break-word;margin:10px 0}
-.big{font-size:20px;font-weight:700}
-.hide{display:none}
-.cheat{font-size:13px}.cheat td,.cheat th{padding:6px 4px}.cheat td code{font-size:12px;word-break:break-word}
+.bigtxt{font-size:20px;font-weight:700}
+
+/* juice */
+@keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(4px)}30%,50%,70%{transform:translateX(-7px)}40%,60%{transform:translateX(7px)}}
+.shake{animation:shake .4s}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.03)}100%{transform:scale(1)}}
+.pop{animation:pop .3s}
+.float{position:absolute;right:20px;top:14px;font-weight:800;color:var(--good);font-size:22px;pointer-events:none;animation:floatup .9s forwards}
+@keyframes floatup{to{transform:translateY(-40px);opacity:0}}
+#toasts{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);display:grid;gap:8px;z-index:20;width:min(92vw,420px)}
+.toast{background:var(--card);border:1px solid var(--gold);border-radius:12px;padding:10px 14px;box-shadow:0 6px 24px rgba(0,0,0,.18);font-size:15px;animation:tin .25s;transition:opacity .4s,transform .4s}
+.toast.out{opacity:0;transform:translateY(-10px)}
+@keyframes tin{from{opacity:0;transform:translateY(-10px)}}
+.conf{position:fixed;top:-12px;width:9px;height:14px;border-radius:2px;z-index:30;pointer-events:none;animation:fall 1.4s ease-in forwards}
+@keyframes fall{to{transform:translate(var(--dx),105vh) rotate(800deg);opacity:.7}}
+@media (prefers-reduced-motion: reduce){.shake,.pop,.float,.conf,.toast{animation:none}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>Big O Practice</h1>
+  <header class="top">
+    <h1>Big O</h1>
+    <div class="lvl"><div class="t" id="lvlText"></div><div class="bar"><i id="xpBar"></i></div><small id="xpText"></small></div>
+    <button class="iconbtn" id="snd" aria-label="Toggle sound"></button>
+  </header>
   <nav id="tabs">
-    <button data-tab="practice" class="on">Practice</button>
-    <button data-tab="rules">Rules</button>
-    <button data-tab="tracer">Loop tracer</button>
-    <button data-tab="doubling">Doubling</button>
-    <button data-tab="cheat">Cheat sheet</button>
+    <button data-tab="play" class="on">Play</button>
+    <button data-tab="learn">Learn</button>
+    <button data-tab="badges">Badges</button>
   </nav>
 
-  <section id="practice">
-    <div class="chips" id="filters"></div>
-    <div class="stats" id="stats"></div>
-    <div class="card" id="qcard"></div>
+  <section id="play">
+    <div id="menu" class="modes"></div>
+    <div id="game" class="hide">
+      <div class="hud" id="hud"></div>
+      <div id="subhud"></div>
+      <div class="card" id="qcard"></div>
+    </div>
+    <div id="end" class="card endc hide"></div>
   </section>
 
-  <section id="rules" class="hide">
-    <div class="card">
+  <section id="learn" class="hide">
+    <div class="chips" id="learnChips" style="margin-bottom:12px">
+      <button class="chip on" data-l="rules">Rules</button>
+      <button class="chip" data-l="tracer">Loop tracer</button>
+      <button class="chip" data-l="doubling">Doubling</button>
+      <button class="chip" data-l="cheat">Cheat sheet</button>
+    </div>
+    <div class="card lsec" id="l-rules">
       <h2>The rules</h2>
       <ol class="rules">
         <li><b>Total = passes × cost per pass.</b> Count how many times a loop runs, then multiply by what each run does.</li>
@@ -104,10 +187,7 @@ input{width:120px}
         <li><b>Recursion: calls × work per call.</b> Draw the call tree. One call each time works like a loop; two calls each time doubles every level.</li>
       </ol>
     </div>
-  </section>
-
-  <section id="tracer" class="hide">
-    <div class="card">
+    <div class="card lsec hide" id="l-tracer">
       <h2>Loop tracer</h2>
       <p class="muted" style="margin-top:0">Pick an update and an n, and watch what values <code>i</code> takes. Count the passes.</p>
       <div class="ctl">
@@ -124,23 +204,13 @@ input{width:120px}
       <div class="seq" id="tSeq"></div>
       <div id="tOut"></div>
     </div>
-  </section>
-
-  <section id="doubling" class="hide">
-    <div class="card">
+    <div class="card lsec hide" id="l-doubling">
       <h2>What happens when n doubles?</h2>
       <p class="muted" style="margin-top:0">The core question behind Big O. Rough step counts:</p>
-      <div class="ctl">
-        <label>n = <select id="dN">
-          <option>10</option><option>100</option><option selected>1000</option><option>1000000</option>
-        </select></label>
-      </div>
+      <div class="ctl"><label>n = <select id="dN"><option>10</option><option>100</option><option selected>1000</option><option>1000000</option></select></label></div>
       <table id="dTable"></table>
     </div>
-  </section>
-
-  <section id="cheat" class="hide">
-    <div class="card">
+    <div class="card lsec hide" id="l-cheat">
       <h2>Common operation costs</h2>
       <div style="overflow-x:auto"><table class="cheat">
         <thead><tr><th>Operation</th><th>Python</th><th>C#</th><th>Cost</th></tr></thead>
@@ -149,169 +219,487 @@ input{width:120px}
       <p class="muted" style="font-size:13px;margin-bottom:0">"Append/Add" is O(1) on average: once in a while the list grows its storage, but spread out over many adds it stays constant.</p>
     </div>
   </section>
+
+  <section id="badges" class="hide">
+    <div class="card"><h2>Your stats</h2><div class="profile" id="profile"></div></div>
+    <div class="card"><h2>Badges <span class="muted" id="badgeCount" style="font-weight:400;font-size:14px"></span></h2><div class="grid" id="badgeGrid"></div></div>
+    <p style="text-align:center"><button class="link" id="resetAll">Reset all progress</button></p>
+  </section>
 </div>
+<div id="toasts"></div>
 
 <script>
-const LABEL={"1":"O(1)","logn":"O(log n)","n":"O(n)","nlogn":"O(n log n)","n2":"O(n²)","2n":"O(2ⁿ)"};
-const ORDER=["1","logn","n","nlogn","n2","2n"];
-const TOPICS={basics:"Basics",log:"Log n",hidden:"Hidden loops",rec:"Recursion"};
+const $=id=>document.getElementById(id);
 
-const Q=[
-// ---------- Basics ----------
-{t:"basics",lang:"Python",code:[["x = nums[0]","1"],["y = nums[-1]","1"],["print(x + y)","1"]],a:"1",
+// ================= complexity classes =================
+const CX=[["0,0","O(1)"],["0,1","O(log n)"],["0,2","O(log² n)"],["1,0","O(n)"],["1,1","O(n log n)"],["1,2","O(n log² n)"],["2,0","O(n²)"],["2,1","O(n² log n)"],["3,0","O(n³)"],["exp","O(2ⁿ)"]];
+const LBL=Object.fromEntries(CX);
+const RANK=Object.fromEntries(CX.map((c,i)=>[c[0],i]));
+
+// ================= randomness =================
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const pick=(a,r=Math.random)=>a[Math.floor(r()*a.length)];
+const randint=(lo,hi,r=Math.random)=>lo+Math.floor(r()*(hi-lo+1));
+function shuffle(a,r=Math.random){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function hashStr(s){let h=2166136261;for(const c of s){h^=c.charCodeAt(0);h=Math.imul(h,16777619);}return h>>>0;}
+function choicesFor(ans,r=Math.random){const i=RANK[ans];let s=i-randint(0,5,r);s=Math.max(0,Math.min(CX.length-6,s));return CX.slice(s,s+6).map(c=>c[0]);}
+
+// ================= hand-written snippets =================
+const TOPICS={basics:"Basics",log:"Log n",hidden:"Hidden loops",rec:"Recursion",fresh:"Generated"};
+const HAND=[
+{t:"basics",lang:"Python",code:[["x = nums[0]","1"],["y = nums[-1]","1"],["print(x + y)","1"]],a:"0,0",
  eq:["1 + 1 + 1 = 3","No n anywhere → O(1)"],why:"Each line jumps straight to a spot. Nothing grows when the list grows."},
-{t:"basics",lang:"Python",code:[["total = 0","1"],["for x in nums:","× n"],["    total += x","1"],["print(total)","1"]],a:"n",
+{t:"basics",lang:"Python",code:[["total = 0","1"],["for x in nums:","× n"],["    total += x","1"],["print(total)","1"]],a:"1,0",
  eq:["1 + n × 1 + 1","= n + 2 → O(n)"],why:"The loop runs once per item; everything else is constant."},
-{t:"basics",lang:"Python",code:[["for i in range(10):","× 10"],["    print(nums[i])","1"]],a:"1",
+{t:"basics",lang:"Python",code:[["for i in range(10):","× 10"],["    print(nums[i])","1"]],a:"0,0",
  eq:["10 × 1 = 10","10 never changes → O(1)"],why:"The loop count is fixed at 10. It doesn't grow when the list grows, so it's constant."},
-{t:"basics",lang:"Python",code:[["for x in nums:","× n"],["    print(x)","1"],["for x in nums:","× n"],["    print(x * 2)","1"]],a:"n",
+{t:"basics",lang:"Python",code:[["for x in nums:","× n"],["    print(x)","1"],["for x in nums:","× n"],["    print(x * 2)","1"]],a:"1,0",
  eq:["n × 1 + n × 1","= 2n → O(n)"],why:"Loops one after another add. 2n still just doubles when n doubles, so drop the 2."},
-{t:"basics",lang:"Python",code:[["for a in nums:","× n"],["    for b in nums:","× n"],["        print(a + b)","1"]],a:"n2",
+{t:"basics",lang:"Python",code:[["for a in nums:","× n"],["    for b in nums:","× n"],["        print(a + b)","1"]],a:"2,0",
  eq:["n × n × 1","= n² → O(n²)"],why:"Nested loops multiply: every item gets paired with every item."},
-{t:"basics",lang:"Python",code:[["for x in nums:","× n"],["    print(x)","1"],["for a in nums:","× n"],["    for b in nums:","× n"],["        print(a * b)","1"]],a:"n2",
+{t:"basics",lang:"Python",code:[["for x in nums:","× n"],["    print(x)","1"],["for a in nums:","× n"],["    for b in nums:","× n"],["        print(a * b)","1"]],a:"2,0",
  eq:["n × 1 + n × n × 1","= n² + n → O(n²)"],why:"Add the blocks, then keep the biggest term. n² dwarfs n."},
-{t:"basics",lang:"Python",code:[["n = len(nums)","1"],["for i in range(n):","× n"],["    for j in range(i):","× i (0, 1, 2…)"],["        print(i, j)","1"]],a:"n2",
+{t:"basics",lang:"Python",code:[["n = len(nums)","1"],["for i in range(n):","× n"],["    for j in range(i):","× i (0, 1, 2…)"],["        print(i, j)","1"]],a:"2,0",
  eq:["0 + 1 + 2 + … + (n−1)","≈ n²/2 → O(n²)"],why:"The inner loop grows each pass. Half of n² still has the n² shape, so drop the ½."},
-{t:"basics",lang:"Python",code:[["def find(nums, target):",""],["    for x in nums:","× n"],["        if x == target:","1"],["            return True","1"],["    return False","1"]],a:"n",
+{t:"basics",lang:"Python",code:[["def find(nums, target):",""],["    for x in nums:","× n"],["        if x == target:","1"],["            return True","1"],["    return False","1"]],a:"1,0",
  eq:["worst case: n × 1","= n → O(n)"],why:"It might stop early, but Big O assumes the worst case: target missing, every item checked."},
-
-// ---------- Log n ----------
-{t:"log",lang:"Python",code:[["i = 1","1"],["while i < n:","× log n"],["    i = i * 2","1"]],a:"logn",
+{t:"basics",lang:"C#",code:[["for (int i = 0; i < list.Count; i++)","× n"],["    for (int j = 0; j < list.Count; j++)","× n"],["        for (int k = 0; k < list.Count; k++)","× n"],["            count++;","1"]],a:"3,0",
+ eq:["n × n × n × 1","= n³ → O(n³)"],why:"Three nested loops over the same list multiply: n × n × n."},
+{t:"log",lang:"Python",code:[["i = 1","1"],["while i < n:","× log n"],["    i = i * 2","1"]],a:"0,1",
  eq:["1 + log n × 1","→ O(log n)"],why:"i jumps 1, 2, 4, 8, 16… Doubling up to n takes the same number of steps as halving down from n."},
-{t:"log",lang:"Python",code:[["i = n","1"],["while i > 1:","× log n"],["    i = i // 2","1"]],a:"logn",
+{t:"log",lang:"Python",code:[["i = n","1"],["while i > 1:","× log n"],["    i = i // 2","1"]],a:"0,1",
  eq:["1 + log n × 1","→ O(log n)"],why:"Halving: 64 → 32 → 16 → 8 → 4 → 2 → 1 is 6 passes, and log 64 = 6."},
-{t:"log",lang:"Python",code:[["i = n","1"],["while i > 0:","× n/2"],["    i = i - 2","1"]],a:"n",
+{t:"log",lang:"Python",code:[["i = n","1"],["while i > 0:","× n/2"],["    i = i - 2","1"]],a:"1,0",
  eq:["1 + n/2 × 1","→ O(n)"],why:"Subtracting walks. Any fixed step size is still O(n); just drop the ½."},
-{t:"log",lang:"Python",code:[["i = n","1"],["while i > 1:","× log n"],["    i = i // 3","1"]],a:"logn",
+{t:"log",lang:"Python",code:[["i = n","1"],["while i > 1:","× log n"],["    i = i // 3","1"]],a:"0,1",
  eq:["1 + log n × 1","→ O(log n)"],why:"Dividing by any fixed number (2, 3, 10) is jumping → log n. The base of the log doesn't matter in Big O."},
-{t:"log",lang:"Python",code:[["lo, hi = 0, len(nums) - 1","1"],["while lo <= hi:","× log n"],["    mid = (lo + hi) // 2","1"],["    if nums[mid] == target:","1"],["        return mid","1"],["    elif nums[mid] < target:","1"],["        lo = mid + 1","1"],["    else:",""],["        hi = mid - 1","1"]],a:"logn",
+{t:"log",lang:"Python",code:[["lo, hi = 0, len(nums) - 1","1"],["while lo <= hi:","× log n"],["    mid = (lo + hi) // 2","1"],["    if nums[mid] == target:","1"],["        return mid","1"],["    elif nums[mid] < target:","1"],["        lo = mid + 1","1"],["    else:",""],["        hi = mid - 1","1"]],a:"0,1",
  eq:["1 + log n × (a few constant lines)","→ O(log n)"],why:"Binary search. Each pass throws away half of what's left, like searching a phone book."},
-{t:"log",lang:"Python",code:[["for x in nums:","× n"],["    i = n","1"],["    while i > 1:","× log n"],["        i = i // 2","1"]],a:"nlogn",
+{t:"log",lang:"Python",code:[["for x in nums:","× n"],["    i = n","1"],["    while i > 1:","× log n"],["        i = i // 2","1"]],a:"1,1",
  eq:["n × (1 + log n × 1)","= n log n + n → O(n log n)"],why:"A halving loop inside a walking loop. Nested means multiply."},
-{t:"log",lang:"Python",code:[["i = n","1"],["while i > 1:","× log n"],["    if i in nums:","n (hidden loop)"],["        print(i)","1"],["    i = i // 2","1"]],a:"nlogn",
+{t:"log",lang:"Python",code:[["i = n","1"],["while i > 1:","× log n"],["    if i in nums:","n (hidden loop)"],["        print(i)","1"],["    i = i // 2","1"]],a:"1,1",
  eq:["log n × (n + 1 + 1)","= n log n + 2 log n → O(n log n)"],why:"Only log n passes, but each pass searches the whole list."},
-{t:"log",lang:"Python · challenge",code:[["i = n","1"],["while i > 1:","× log n"],["    for j in range(i):","× i (n, n/2, n/4…)"],["        print(j)","1"],["    i = i // 2","1"]],a:"n",
+{t:"log",lang:"Python",code:[["i = n","1"],["while i > 1:","× log n"],["    j = n","1"],["    while j > 1:","× log n"],["        j = j // 2","1"],["    i = i // 2","1"]],a:"0,2",
+ eq:["log n × log n × 1","= log² n → O(log² n)"],why:"A halving loop inside a halving loop. Nested means multiply: log n × log n."},
+{t:"log",lang:"Python · challenge",code:[["i = n","1"],["while i > 1:","× log n"],["    for j in range(i):","× i (n, n/2, n/4…)"],["        print(j)","1"],["    i = i // 2","1"]],a:"1,0",
  eq:["n + n/2 + n/4 + n/8 + …","≈ 2n → O(n)"],why:"Tricky one! The inner loop shrinks each pass, so passes × cost doesn't apply directly. Add up the actual work instead: the halves sum to about 2n."},
-
-// ---------- Hidden loops ----------
-{t:"hidden",lang:"Python",code:[["for x in nums:","× n"],["    if x in nums:","n (hidden loop)"],["        print(x)","1"]],a:"n2",
+{t:"hidden",lang:"Python",code:[["for x in nums:","× n"],["    if x in nums:","n (hidden loop)"],["        print(x)","1"]],a:"2,0",
  eq:["n × (n + 1)","= n² + n → O(n²)"],why:"`in` on a list checks items one by one, and it runs on every pass."},
-{t:"hidden",lang:"Python",code:[["seen = set(nums)","n (copies every item)"],["for x in nums:","× n"],["    if x in seen:","1 (hash lookup)"],["        print(x)","1"]],a:"n",
+{t:"hidden",lang:"Python",code:[["seen = set(nums)","n (copies every item)"],["for x in nums:","× n"],["    if x in seen:","1 (hash lookup)"],["        print(x)","1"]],a:"1,0",
  eq:["n + n × (1 + 1)","= 3n → O(n)"],why:"`in` on a set jumps straight to the answer. Building the set costs n once, outside the loop."},
-{t:"hidden",lang:"Python",code:[["while len(nums) > 0:","× n"],["    nums.pop(0)","n (everything shifts)"]],a:"n2",
+{t:"hidden",lang:"Python",code:[["while len(nums) > 0:","× n"],["    nums.pop(0)","n (everything shifts)"]],a:"2,0",
  eq:["n + (n−1) + … + 1","≈ n²/2 → O(n²)"],why:"Removing from the front shifts every remaining item down a slot, every pass."},
-{t:"hidden",lang:"Python",code:[["while len(nums) > 0:","× n (len is 1)"],["    nums.pop()","1 (nothing shifts)"]],a:"n",
+{t:"hidden",lang:"Python",code:[["while len(nums) > 0:","× n (len is 1)"],["    nums.pop()","1 (nothing shifts)"]],a:"1,0",
  eq:["n × (1 + 1)","= 2n → O(n)"],why:"Removing from the end moves nothing, and len() just reads a stored number."},
-{t:"hidden",lang:"Python",code:[["nums.sort()","n log n"],["for x in nums:","× n"],["    print(x)","1"]],a:"nlogn",
+{t:"hidden",lang:"Python",code:[["nums.sort()","n log n"],["for x in nums:","× n"],["    print(x)","1"]],a:"1,1",
  eq:["n log n + n × 1","→ O(n log n)"],why:"Good sorting is n log n. It's bigger than the loop's n, so it wins."},
-{t:"hidden",lang:"Python",code:[["for x in nums:","× n"],["    if x == max(nums):","n (scans the list)"],["        print(x)","1"]],a:"n2",
+{t:"hidden",lang:"Python",code:[["for x in nums:","× n"],["    if x == max(nums):","n (scans the list)"],["        print(x)","1"]],a:"2,0",
  eq:["n × (n + 1)","→ O(n²)"],why:"max() looks at every item, every pass. Fix: compute it once before the loop → O(n)."},
-{t:"hidden",lang:"C#",code:[["foreach (var x in list)","× n"],["{",""],["    if (list.Contains(x))","n (hidden loop)"],["        Console.WriteLine(x);","1"],["}",""]],a:"n2",
+{t:"hidden",lang:"Python",code:[["for x in nums:","× n"],["    copy = nums[:]","n (copies every item)"],["    copy.sort()","n log n"]],a:"2,1",
+ eq:["n × (n + n log n)","= n² + n² log n → O(n² log n)"],why:"Every pass copies and sorts the whole list. Keep the biggest term inside the parentheses, then multiply."},
+{t:"hidden",lang:"C#",code:[["foreach (var x in list)","× n"],["{",""],["    if (list.Contains(x))","n (hidden loop)"],["        Console.WriteLine(x);","1"],["}",""]],a:"2,0",
  eq:["n × (n + 1)","→ O(n²)"],why:"List.Contains walks the list. A HashSet<T> would make it 1."},
-{t:"hidden",lang:"C#",code:[["var counts = new Dictionary<int, int>();","1"],["foreach (var x in list)","× n"],["    counts[x] = counts.GetValueOrDefault(x) + 1;","1 (hash)"]],a:"n",
+{t:"hidden",lang:"C#",code:[["var counts = new Dictionary<int, int>();","1"],["foreach (var x in list)","× n"],["    counts[x] = counts.GetValueOrDefault(x) + 1;","1 (hash)"]],a:"1,0",
  eq:["1 + n × 1","→ O(n)"],why:"Dictionary reads and writes jump straight to the right slot."},
-{t:"hidden",lang:"C#",code:[["while (list.Count > 0)","× n (Count is 1)"],["    list.RemoveAt(list.Count - 1);","1 (from the end)"]],a:"n",
+{t:"hidden",lang:"C#",code:[["while (list.Count > 0)","× n (Count is 1)"],["    list.RemoveAt(list.Count - 1);","1 (from the end)"]],a:"1,0",
  eq:["n × (1 + 1)","→ O(n)"],why:"Count is a stored number, and removing the last item moves nothing."},
-{t:"hidden",lang:"C#",code:[["while (list.Count > 0)","× n"],["    list.RemoveAt(0);","n (everything shifts)"]],a:"n2",
+{t:"hidden",lang:"C#",code:[["while (list.Count > 0)","× n"],["    list.RemoveAt(0);","n (everything shifts)"]],a:"2,0",
  eq:["n + (n−1) + … + 1","≈ n²/2 → O(n²)"],why:"Same as Python's pop(0): removing the front shifts everything behind it."},
-{t:"hidden",lang:"C#",code:[["IEnumerable<int> items = GetItems();","1"],["for (int i = 0; i < items.Count(); i++)","× n, and Count() is n"],["    Console.WriteLine(i);","1"]],a:"n2",
+{t:"hidden",lang:"C#",code:[["IEnumerable<int> items = GetItems();","1"],["for (int i = 0; i < items.Count(); i++)","× n, and Count() is n"],["    Console.WriteLine(i);","1"]],a:"2,0",
  eq:["n × (n + 1)","→ O(n²)"],why:"LINQ's Count() on an IEnumerable can walk every item, and the condition runs every pass. Store it in a variable first."},
-
-// ---------- Recursion ----------
-{t:"rec",lang:"Python",code:[["def f(n):",""],["    if n <= 1:","1"],["        return","1"],["    f(n - 1)","1 call, n−1 left"]],a:"n",
+{t:"rec",lang:"Python",code:[["def f(n):",""],["    if n <= 1:","1"],["        return","1"],["    f(n - 1)","1 call, n−1 left"]],a:"1,0",
  eq:["n calls × 1 work each","= n → O(n)"],why:"Recursion is a loop in disguise: subtract 1 each call → n calls."},
-{t:"rec",lang:"Python",code:[["def f(n):",""],["    if n <= 1:","1"],["        return","1"],["    f(n // 2)","1 call, n/2 left"]],a:"logn",
+{t:"rec",lang:"Python",code:[["def f(n):",""],["    if n <= 1:","1"],["        return","1"],["    f(n // 2)","1 call, n/2 left"]],a:"0,1",
  eq:["log n calls × 1 work each","→ O(log n)"],why:"Halving each call, just like a halving loop."},
-{t:"rec",lang:"Python",code:[["def f(n):",""],["    if n <= 1:","1"],["        return","1"],["    for i in range(n):","× n"],["        print(i)","1"],["    f(n - 1)","1 call, n−1 left"]],a:"n2",
+{t:"rec",lang:"Python",code:[["def f(n):",""],["    if n <= 1:","1"],["        return","1"],["    for i in range(n):","× n"],["        print(i)","1"],["    f(n - 1)","1 call, n−1 left"]],a:"2,0",
  eq:["n + (n−1) + (n−2) + … + 1","≈ n²/2 → O(n²)"],why:"n calls, and each one loops over its own n. Same triangle as the nested j-in-range(i) loop."},
-{t:"rec",lang:"Python",code:[["def fib(n):",""],["    if n <= 1:","1"],["        return n","1"],["    return fib(n - 1) + fib(n - 2)","2 calls each time"]],a:"2n",
+{t:"rec",lang:"Python",code:[["def fib(n):",""],["    if n <= 1:","1"],["        return n","1"],["    return fib(n - 1) + fib(n - 2)","2 calls each time"]],a:"exp",
  eq:["calls per level: 1, 2, 4, 8, …","~n levels → ≈ 2ⁿ calls → O(2ⁿ)"],why:"Each call makes two more, so the call tree doubles every level."},
-{t:"rec",lang:"Python",code:[["def sort(nums):",""],["    if len(nums) <= 1:","1"],["        return nums","1"],["    mid = len(nums) // 2","1"],["    left = sort(nums[:mid])","half the list"],["    right = sort(nums[mid:])","half the list"],["    return merge(left, right)","n (walks both halves)"]],a:"nlogn",
- eq:["log n levels (halving each time)","× n work per level → O(n log n)"],why:"Merge sort. Halving gives log n levels of calls, and each level merges n items in total."}
+{t:"rec",lang:"Python",code:[["def sort(nums):",""],["    if len(nums) <= 1:","1"],["        return nums","1"],["    mid = len(nums) // 2","1"],["    left = sort(nums[:mid])","half the list"],["    right = sort(nums[mid:])","half the list"],["    return merge(left, right)","n (walks both halves)"]],a:"1,1",
+ eq:["log n levels (halving each time)","× n work per level → O(n log n)"],why:"Merge sort. Halving gives log n levels of calls, and each level merges n items in total."},
+{t:"rec",lang:"Python",code:[["def subsets(items):",""],["    if not items:","1"],["        return [[]]","1"],["    rest = subsets(items[1:])","1 call, n−1 left"],["    return rest + [[items[0]] + s for s in rest]","doubles the result"]],a:"exp",
+ eq:["result size: 1, 2, 4, 8, …","each item doubles it → O(2ⁿ)"],why:"Every item is either in or out of a subset, so the output doubles with each item."}
 ];
-
-const CHEAT=[
-["Get by index","list[i]","list[i]","1"],
-["Length","len(list)","list.Count","1"],
-["Add to end","list.append(x)","list.Add(x)","1"],
-["Remove from end","list.pop()","RemoveAt(Count-1)","1"],
-["Remove from front","list.pop(0)","RemoveAt(0)","n"],
-["Insert at front","list.insert(0, x)","Insert(0, x)","n"],
-["Search a list","x in list","list.Contains(x)","n"],
-["Search a set","x in set","hashSet.Contains(x)","1"],
-["Dictionary lookup","d[key]","dict[key]","1"],
-["Max / min / sum","max(list)","list.Max()","n"],
-["Sort","list.sort()","list.Sort()","n log n"],
-["Copy a list","list[:]","list.ToList()","n"],
-["Count a lazy sequence","—","items.Count()","n"],
-["Build a set","set(list)","new HashSet<T>(list)","n"]
-];
-
-// ---------- helpers ----------
-function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
-const KW=/\b(for|foreach|in|while|if|elif|else|def|return|var|new|int|True|False)\b/g;
-function hl(line){let h=esc(line);h=h.replace(/\b(\d+)\b/g,'<span class="num">$1</span>');return h.replace(KW,'<span class="kw">$1</span>');}
-function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
-function md(s){return esc(s).replace(/`([^`]+)`/g,"<code>$1</code>");}
-
-// ---------- stats ----------
-function loadStats(){try{const s=JSON.parse(localStorage.getItem("big-o-practice-stats"));if(s&&typeof s.total==="number")return s;}catch(e){}return{right:0,total:0,streak:0,best:0};}
-function saveStats(){try{localStorage.setItem("big-o-practice-stats",JSON.stringify(stats));}catch(e){}}
-let stats=loadStats();
-
-// ---------- practice ----------
-const S={filter:"all",queue:[],idx:-1,hints:0,answered:false,pick:null};
-
-function renderFilters(){
-  const el=document.getElementById("filters");
-  const opts=[["all","All"]].concat(Object.entries(TOPICS));
-  el.innerHTML=opts.map(([k,v])=>`<button class="chip${S.filter===k?" on":""}" data-f="${k}">${v}</button>`).join("");
-  el.querySelectorAll("button").forEach(b=>b.onclick=()=>{S.filter=b.dataset.f;S.queue=[];renderFilters();nextQ();});
+const LISTS=["nums","items","data","scores","values","prices","ages"];
+function handQ(q,r=Math.random){
+  const L=pick(LISTS,r), cs=q.lang.startsWith("C#");
+  const code=q.code.map(([t,c])=>[cs?t.replace(/\blist\b/g,L):t.replace(/\bnums\b/g,L),c]);
+  return {topic:q.t,lang:q.lang,code,a:q.a,eq:q.eq,why:q.why,hidden:q.t==="hidden"};
 }
-function renderStats(){
-  const pct=stats.total?Math.round(stats.right/stats.total*100):0;
-  document.getElementById("stats").innerHTML=
-    `<span>Score <b>${stats.right}/${stats.total}</b>${stats.total?` (${pct}%)`:""}</span>`+
-    `<span>Streak <b>${stats.streak}</b></span><span>Best <b>${stats.best}</b></span>`+
-    `<button class="link" id="reset">Reset</button>`;
-  document.getElementById("reset").onclick=()=>{stats={right:0,total:0,streak:0,best:0};saveStats();renderStats();};
+
+// ================= snippet generator =================
+const CNT=["i","j","k","m","p","q","r","s","t"], WV=["x","y","z","w","u","v","a","b","c"];
+const LOOPS_ALL=["walk","range","fixed","halve","double","step"];
+const TIER={
+  1:{b:[1,1],d:[1,1],loops:["walk","range","fixed","walk"],leaves:["const"],tops:[]},
+  2:{b:[1,2],d:[1,2],loops:LOOPS_ALL,leaves:["const"],tops:[]},
+  3:{b:[1,2],d:[1,2],loops:LOOPS_ALL,leaves:["const","const","contains","sum","set"],tops:["sort","sumtop"]},
+  4:{b:[1,2],d:[2,3],loops:LOOPS_ALL,leaves:["const","contains","sum","set"],tops:["sort","sumtop"]}
+};
+const LF={walk:[1,0],range:[1,0],fixed:[0,0],halve:[0,1],double:[0,1],step:[1,0]};
+const LEAF={const:{e:[0,0],ex:"1"},contains:{e:[1,0],ex:"n",hidden:1},sum:{e:[1,0],ex:"n",hidden:1},set:{e:[0,0],ex:"1"}};
+const TOP={sort:{e:[1,1],ex:"n log n"},sumtop:{e:[1,0],ex:"n",hidden:1}};
+const ekey=e=>e[0]+","+e[1];
+const bigger=(a,b)=>a[0]!==b[0]?(a[0]>b[0]?a:b):(a[1]>=b[1]?a:b);
+function factor(lp){return lp.type==="fixed"?String(lp.k):lp.type==="step"?"n/"+lp.c:(lp.type==="halve"||lp.type==="double")?"log n":"n";}
+
+function leafPy(leaf,pad,L){
+  if(leaf==="const")return[[pad+"count += 1","1"]];
+  if(leaf==="contains")return[[pad+`if 42 in ${L}:`,"n (hidden loop)"],[pad+"    count += 1","1"]];
+  if(leaf==="sum")return[[pad+`count += sum(${L})`,"n (sum)"]];
+  return[[pad+"if 42 in seen:","1 (hash lookup)"],[pad+"    count += 1","1"]];
 }
-function nextQ(){
-  const pool=Q.map((q,i)=>i).filter(i=>S.filter==="all"||Q[i].t===S.filter);
-  if(!S.queue.length){S.queue=shuffle(pool);if(S.queue.length>1&&S.queue[0]===S.idx)S.queue.push(S.queue.shift());}
-  S.idx=S.queue.shift();S.hints=0;S.answered=false;S.pick=null;renderQ();
+function leafCs(leaf,pad,L){
+  if(leaf==="const")return[[pad+"count++;","1"]];
+  if(leaf==="contains")return[[pad+`if (${L}.Contains(42)) count++;`,"n (hidden loop)"]];
+  if(leaf==="sum")return[[pad+`count += ${L}.Sum();`,"n (sum)"]];
+  return[[pad+"if (seen.Contains(42)) count++;","1 (hash lookup)"]];
 }
-function costLines(q){return q.code.map((l,i)=>l[1]?i:-1).filter(i=>i>=0);}
-function renderQ(){
-  const q=Q[S.idx],cl=costLines(q),shown=new Set(S.answered?cl:cl.slice(0,S.hints));
-  const lastHint=!S.answered&&S.hints>0?cl[S.hints-1]:-1;
-  let h=`<div class="meta"><span class="tag">${TOPICS[q.t]}</span><span class="tag">${q.lang}</span></div>`;
-  h+=`<div class="code">`+q.code.map((l,i)=>`<div class="row${i===lastHint?" lit":""}"><span class="line">${hl(l[0])||" "}</span>${shown.has(i)?`<span class="cost">${esc(l[1])}</span>`:""}</div>`).join("")+`</div>`;
-  h+=`<div class="prompt">What's the Big O?</div><div class="choices">`+ORDER.map(k=>{
-    let c="";if(S.answered){if(k===q.a)c="right";else if(k===S.pick)c="wrong";}
-    return `<button data-k="${k}" class="${c}"${S.answered?" disabled":""}>${LABEL[k]}</button>`;}).join("")+`</div>`;
-  if(!S.answered){
-    h+=`<div class="actions"><button class="btn" id="hint"${S.hints>=cl.length?" disabled":""}>Hint: show a line's cost (${S.hints}/${cl.length})</button><button class="btn" id="skip">Skip</button></div>`;
-  }else{
-    const ok=S.pick===q.a;
-    h+=`<div class="fb ${ok?"good":"bad"}"><div class="verdict">${ok?"Correct!":"Not quite. It's "+LABEL[q.a]+"."}</div>`+
-       `<div class="eq">${q.eq.map(esc).join("<br>")}</div><div>${md(q.why)}</div></div>`+
-       `<div class="actions"><button class="btn primary" id="next">Next snippet</button></div>`;
+function rPy(loops,leaf,ind,L){
+  const pad=" ".repeat(ind);
+  if(!loops.length)return leafPy(leaf,pad,L);
+  const [lp,...rest]=loops, inner=rPy(rest,leaf,ind+4,L), v=lp.v;
+  switch(lp.type){
+    case "walk":return[[pad+`for ${v} in ${L}:`,"× n"],...inner];
+    case "range":return[[pad+`for ${v} in range(n):`,"× n"],...inner];
+    case "fixed":return[[pad+`for ${v} in range(${lp.k}):`,`× ${lp.k}`],...inner];
+    case "halve":return[[pad+`${v} = n`,"1"],[pad+`while ${v} > 1:`,"× log n"],...inner,[pad+`    ${v} = ${v} // ${lp.c}`,"1"]];
+    case "double":return[[pad+`${v} = 1`,"1"],[pad+`while ${v} < n:`,"× log n"],...inner,[pad+`    ${v} = ${v} * ${lp.c}`,"1"]];
+    case "step":return[[pad+`${v} = 0`,"1"],[pad+`while ${v} < n:`,`× n/${lp.c}`],...inner,[pad+`    ${v} += ${lp.c}`,"1"]];
   }
-  const card=document.getElementById("qcard");card.innerHTML=h;
+}
+function rCs(loops,leaf,ind,L){
+  const pad=" ".repeat(ind);
+  if(!loops.length)return leafCs(leaf,pad,L);
+  const [lp,...rest]=loops, inner=rCs(rest,leaf,ind+4,L), v=lp.v;
+  const wrap=(head)=>inner.length===1?[head,...inner]:[head,[pad+"{",""],...inner,[pad+"}",""]];
+  const wl=(init,cond,step,cost)=>[[pad+init,"1"],[pad+cond,cost],[pad+"{",""],...inner,[pad+"    "+step,"1"],[pad+"}",""]];
+  switch(lp.type){
+    case "walk":return wrap([pad+`foreach (var ${v} in ${L})`,"× n"]);
+    case "range":return wrap([pad+`for (int ${v} = 0; ${v} < n; ${v}++)`,"× n"]);
+    case "fixed":return wrap([pad+`for (int ${v} = 0; ${v} < ${lp.k}; ${v}++)`,`× ${lp.k}`]);
+    case "halve":return wl(`int ${v} = n;`,`while (${v} > 1)`,`${v} /= ${lp.c};`,"× log n");
+    case "double":return wl(`int ${v} = 1;`,`while (${v} < n)`,`${v} *= ${lp.c};`,"× log n");
+    case "step":return wl(`int ${v} = 0;`,`while (${v} < n)`,`${v} += ${lp.c};`,`× n/${lp.c}`);
+  }
+}
+const WHY={
+  walk:{py:"`for x in list` visits every item → n passes.",cs:"`foreach` visits every item → n passes."},
+  range:{py:"`range(n)` counts up to n → n passes.",cs:"`i < n; i++` counts up to n → n passes."},
+  fixed:"A fixed count never grows with the input → constant.",
+  halve:"Dividing by a fixed number each pass is jumping → log n passes.",
+  double:"Multiplying by a fixed number each pass is jumping → log n passes.",
+  step:"Adding a fixed step is still walking → n passes (drop the ÷).",
+  contains:{py:"`42 in list` is a hidden loop → n.",cs:"`List.Contains` is a hidden loop → n."},
+  sum:{py:"`sum()` adds up every item → n.",cs:"`.Sum()` adds up every item → n."},
+  set:"Set lookups are hash jumps → 1, but building the set costs n once.",
+  sort:"Sorting the list costs n log n."
+};
+function genQ(tier,r=Math.random){
+  const T=TIER[tier];
+  for(let att=0;att<80;att++){
+    const py=r()<0.6, lang=py?"py":"cs", L=pick(LISTS,r), cnt=CNT.slice(), wv=WV.slice();
+    const items=[], feats=[]; let usedSet=false, hidden=false, nested=false, ok=true;
+    const feat=f=>{if(!feats.includes(f))feats.push(f);};
+    if(T.tops.length&&r()<0.35){const t=pick(T.tops,r);items.push({top:t,e:TOP[t].e,ex:TOP[t].ex});feat(t==="sumtop"?"sum":t);if(TOP[t].hidden)hidden=true;}
+    const nb=randint(T.b[0],T.b[1],r);
+    for(let b=0;b<nb;b++){
+      const depth=randint(T.d[0],T.d[1],r); if(depth>1)nested=true;
+      const loops=[];
+      for(let d=0;d<depth;d++){
+        const type=pick(T.loops,r), lp={type};
+        lp.v=type==="walk"?wv.shift():cnt.shift(); if(!lp.v)ok=false;
+        if(type==="fixed")lp.k=pick([3,5,8,10,20,100],r);
+        if(type==="halve"||type==="double")lp.c=r()<0.75?2:3;
+        if(type==="step")lp.c=randint(2,5,r);
+        loops.push(lp); feat(type);
+      }
+      const leaf=pick(T.leaves,r); feat(leaf); if(leaf==="set")usedSet=true; if(LEAF[leaf].hidden)hidden=true;
+      let e=[0,0]; loops.forEach(lp=>{e=[e[0]+LF[lp.type][0],e[1]+LF[lp.type][1]];}); e=[e[0]+LEAF[leaf].e[0],e[1]+LEAF[leaf].e[1]];
+      items.push({loops,leaf,e,ex:loops.map(factor).concat(LEAF[leaf].ex).join(" × ")});
+    }
+    if(!ok)continue;
+    const terms=(usedSet?[{e:[1,0],ex:"n"}]:[]).concat(items);
+    const total=terms.reduce((a,t)=>bigger(a,t.e),[0,0]), ans=ekey(total);
+    if(!LBL[ans]||ans==="exp")continue;
+    if(tier>=3&&ans==="0,0")continue;
+    // render code
+    const code=[];
+    if(py){code.push([`n = len(${L})`,"1"],["count = 0","1"]);if(usedSet)code.push([`seen = set(${L})`,"n (copies every item)"]);}
+    else{code.push([`int n = ${L}.Count;`,"1"],["int count = 0;","1"]);if(usedSet)code.push([`var seen = new HashSet<int>(${L});`,"n (copies every item)"]);}
+    items.forEach(it=>{
+      code.push(["",""]);
+      if(it.top==="sort")code.push(py?[`${L}.sort()`,"n log n"]:[`${L}.Sort();`,"n log n"]);
+      else if(it.top==="sumtop")code.push(py?[`count += sum(${L})`,"n (sum)"]:[`count += ${L}.Sum();`,"n (sum)"]);
+      else code.push(...(py?rPy:rCs)(it.loops,it.leaf,0,L));
+    });
+    code.push(["",""],py?["print(count)","1"]:["Console.WriteLine(count);","1"]);
+    const eq=[terms.map(t=>t.ex).join("  +  "),(terms.length>1?"keep the biggest term → ":"→ ")+LBL[ans]];
+    const why=feats.filter(f=>WHY[f]).map(f=>{const w=WHY[f];return typeof w==="string"?w:w[lang];});
+    if(nested)why.push("Nested loops multiply.");
+    if(terms.length>1)why.push("Blocks one after another add; keep the biggest term.");
+    why.push("Setup lines like `n = …` are constant, so they drop out.");
+    return {topic:"fresh",lang:py?"Python":"C#",code,a:ans,eq,why,hidden,fresh:true};
+  }
+  return handQ(pick(HAND,r),r);
+}
+
+// ================= save data =================
+const SAVE_KEY="big-o-practice-save";
+const DEF={xp:0,totalCorrect:0,totalAnswered:0,streak:0,bestStreak:0,logCorrect:0,hiddenCorrect:0,recCorrect:0,freshCorrect:0,
+  blitzBest:0,survivalBest:0,dailyLast:"",dailyScore:0,dailyStreak:0,dailyStreakBest:0,dailyDone:0,dailyPerfect:0,ach:{},sound:true};
+let S=loadSave();
+function loadSave(){
+  let s=null;try{s=JSON.parse(localStorage.getItem(SAVE_KEY));}catch(e){}
+  const out=Object.assign({},DEF,s&&typeof s==="object"?s:{});out.ach=Object.assign({},out.ach||{});
+  if(!s){try{const old=JSON.parse(localStorage.getItem("big-o-practice-stats"));if(old&&typeof old.total==="number"){out.totalCorrect=old.right;out.totalAnswered=old.total;out.bestStreak=old.best||0;out.xp=(old.right||0)*10;}}catch(e){}}
+  return out;
+}
+function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(S));}catch(e){}}
+
+// ================= levels, badges, juice =================
+const TITLES=[[1,"O(2ⁿ) Rookie"],[3,"O(n³) Apprentice"],[5,"O(n²) Coder"],[8,"O(n log n) Engineer"],[12,"O(n) Optimizer"],[16,"O(log n) Wizard"],[20,"O(1) Legend"]];
+const level=xp=>Math.floor(Math.sqrt(xp/30))+1, xpAt=L=>30*(L-1)*(L-1);
+function title(L){let t=TITLES[0][1];for(const [l,n] of TITLES)if(L>=l)t=n;return t;}
+const ACH=[
+  ["first","👣","First Step","Get an answer right",s=>s.totalCorrect>=1],
+  ["streak5","🔥","On a Roll","5 right in a row",s=>s.bestStreak>=5],
+  ["streak10","☄️","Unstoppable","10 right in a row",s=>s.bestStreak>=10],
+  ["streak25","🧠","O(1) Brain","25 right in a row",s=>s.bestStreak>=25],
+  ["c50","🎯","Sharpshooter","50 correct answers",s=>s.totalCorrect>=50],
+  ["c250","💯","Grinder","250 correct answers",s=>s.totalCorrect>=250],
+  ["log10","🪵","Log Lord","10 right answers with a log in them",s=>s.logCorrect>=10],
+  ["hidden10","🕵️","Loop Detective","Spot 10 hidden loops",s=>s.hiddenCorrect>=10],
+  ["rec5","🌀","Recursion Ranger","5 recursion snippets right",s=>s.recCorrect>=5],
+  ["fresh25","🧪","Fresh Eyes","25 generated snippets right",s=>s.freshCorrect>=25],
+  ["blitz1k","⚡","Speed Demon","1,000 points in Blitz",s=>s.blitzBest>=1000],
+  ["blitz3k","🌩️","Lightning","3,000 points in Blitz",s=>s.blitzBest>=3000],
+  ["surv10","❤️","Survivor","10 right in one Survival run",s=>s.survivalBest>=10],
+  ["surv25","🛡️","Iron Will","25 right in one Survival run",s=>s.survivalBest>=25],
+  ["daily1","📅","Daily Driver","Finish a daily challenge",s=>s.dailyDone>=1],
+  ["daily7","🗓️","Habit Formed","7-day daily streak",s=>s.dailyStreakBest>=7],
+  ["perfect","✨","Flawless","10/10 on a daily",s=>s.dailyPerfect>=1],
+  ["lvl8","🛠️","Engineer","Reach level 8",s=>level(s.xp)>=8],
+  ["lvl20","👑","Legend","Reach level 20",s=>level(s.xp)>=20]
+];
+function renderTop(){
+  const L=level(S.xp),a=xpAt(L),b=xpAt(L+1);
+  $("lvlText").textContent=`Lv ${L} · ${title(L)}`;
+  $("xpBar").style.width=Math.min(100,(S.xp-a)/(b-a)*100)+"%";
+  $("xpText").textContent=`${S.xp-a} / ${b-a} XP to level ${L+1}`;
+  $("snd").textContent=S.sound?"🔊":"🔇";
+}
+function addXP(n){
+  n=Math.round(n);if(n<=0)return;
+  const before=level(S.xp);S.xp+=n;const after=level(S.xp);
+  if(after>before){toast(`⬆️ Level ${after}! <b>${title(after)}</b>`);tone([523,659,784,1047],0.1);confetti();}
+  renderTop();save();
+}
+function checkAch(){
+  for(const [id,e,name,,f] of ACH){
+    if(!S.ach[id]&&f(S)){S.ach[id]=Date.now();toast(`${e} Badge unlocked: <b>${name}</b>`);tone([784,988,1319],0.08);}
+  }
+  save();
+}
+function toast(h){const T=$("toasts");while(T.children.length>=3)T.firstChild.remove();const d=document.createElement("div");d.className="toast";d.innerHTML=h;$("toasts").appendChild(d);setTimeout(()=>d.classList.add("out"),2600);setTimeout(()=>d.remove(),3100);}
+let AC=null;
+function tone(freqs,dur=0.09,type="sine",vol=0.15){
+  if(!S.sound)return;
+  try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();
+    freqs.forEach((f,i)=>{const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime+i*dur;o.type=type;o.frequency.value=f;
+      g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      o.connect(g).connect(AC.destination);o.start(t);o.stop(t+dur+0.03);});
+  }catch(e){}
+}
+const sfx={right:()=>tone([660,990],0.08),wrong:()=>tone([220,165],0.14,"square",0.06),tick:()=>tone([880],0.04,"sine",0.05)};
+function confetti(){
+  const colors=["#4c5fd5","#ffc94d","#6bd98a","#ff8a8a","#c79bff"];
+  for(let i=0;i<40;i++){const c=document.createElement("div");c.className="conf";c.style.left=Math.random()*100+"vw";
+    c.style.background=colors[i%colors.length];c.style.setProperty("--dx",(Math.random()*160-80)+"px");c.style.animationDelay=Math.random()*0.3+"s";
+    document.body.appendChild(c);setTimeout(()=>c.remove(),2000);}
+}
+function floatText(t,color){const f=document.createElement("div");f.className="float";f.textContent=t;if(color)f.style.color=color;$("qcard").appendChild(f);setTimeout(()=>f.remove(),900);}
+function animate(el,cls){el.classList.remove(cls);void el.offsetWidth;el.classList.add(cls);}
+
+// ================= dates / daily =================
+function dstr(d=new Date()){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function yesterday(){const d=new Date();d.setDate(d.getDate()-1);return dstr(d);}
+function buildDaily(){
+  const r=mulberry32(hashStr("big-o-daily-"+dstr()));const qs=[];
+  for(let i=0;i<10;i++){const tier=Math.min(4,1+Math.floor(i/3));const q=r()<0.3?handQ(pick(HAND,r),r):genQ(tier,r);q.choices=choicesFor(q.a,r);qs.push(q);}
+  return qs;
+}
+
+// ================= game =================
+const G={mode:null,filter:"all",q:null,answered:false,fb:false,pick:null,hints:0,score:0,combo:0,correct:0,count:0,hearts:3,time:60,timer:null,paused:false,lock:false,daily:[],handQueue:{},xpRun:0};
+const MODES={
+  practice:{ico:"🎯",name:"Practice",desc:"Relaxed. Free hints, pick a topic."},
+  blitz:{ico:"⚡",name:"Blitz",desc:"60 seconds. Combos multiply your score."},
+  survival:{ico:"❤️",name:"Survival",desc:"3 lives. Gets harder the longer you last."},
+  daily:{ico:"📅",name:"Daily",desc:"10 questions, new set every day."}
+};
+function show(id){["menu","game","end"].forEach(x=>$(x).classList.toggle("hide",x!==id));}
+function renderMenu(){
+  const doneToday=S.dailyLast===dstr();
+  const best={practice:S.bestStreak?`Best streak ${S.bestStreak}`:"",blitz:S.blitzBest?`Best ${S.blitzBest.toLocaleString()}`:"",
+    survival:S.survivalBest?`Best ${S.survivalBest}`:"",daily:doneToday?`✓ ${S.dailyScore}/10 today`:(S.dailyStreak?`🔥 ${S.dailyStreak} day${S.dailyStreak>1?"s":""}`:"")};
+  $("menu").innerHTML=Object.entries(MODES).map(([k,m])=>{
+    const dis=k==="daily"&&doneToday;
+    return `<button class="mode" data-mode="${k}"${dis?" disabled":""}><span class="ico">${m.ico}</span><span><b>${m.name}</b><span class="d">${dis?"Done for today. New set tomorrow.":m.desc}</span></span><span class="best">${best[k]}</span></button>`;
+  }).join("");
+  $("menu").querySelectorAll(".mode").forEach(b=>b.onclick=()=>start(b.dataset.mode));
+  show("menu");
+}
+function start(mode){
+  Object.assign(G,{mode,q:null,score:0,combo:0,correct:0,count:0,hearts:3,time:60,paused:false,lock:false,xpRun:0});
+  if(mode==="daily")G.daily=buildDaily();
+  clearInterval(G.timer);
+  if(mode==="blitz"){let last=performance.now();G.timer=setInterval(()=>{const now=performance.now(),dt=(now-last)/1000;last=now;if(G.paused||G.mode!=="blitz")return;
+    const before=Math.ceil(G.time);G.time-=dt;if(Math.ceil(G.time)<before&&G.time<=5&&G.time>0)sfx.tick();
+    if(G.time<=0){G.time=0;end();}else renderHUD();},100);}
+  show("game");nextQ();
+}
+function nextHand(filter){
+  const pool=HAND.map((q,i)=>i).filter(i=>filter==="all"||HAND[i].t===filter);
+  if(!G.handQueue[filter]||!G.handQueue[filter].length)G.handQueue[filter]=shuffle(pool);
+  return handQ(HAND[G.handQueue[filter].shift()]);
+}
+function getQ(){
+  const m=G.mode;let q;
+  if(m==="daily")return G.daily[G.count];
+  if(m==="practice"){
+    if(G.filter==="fresh")q=genQ(randint(2,4));
+    else if(G.filter==="all")q=Math.random()<0.55?genQ(randint(1,4)):nextHand("all");
+    else q=nextHand(G.filter);
+  }else{
+    const tier=Math.min(4,1+Math.floor((m==="blitz"?G.correct:G.count)/4));
+    q=Math.random()<0.35?nextHand("all"):genQ(tier);
+  }
+  q.choices=choicesFor(q.a);return q;
+}
+function nextQ(){G.q=getQ();G.answered=false;G.fb=false;G.pick=null;G.hints=0;G.lock=false;renderHUD();renderQ();}
+const mult=()=>Math.min(5,1+Math.floor(G.combo/3));
+function renderHUD(){
+  const m=G.mode;let h="",sub="";
+  const quit=`<button class="link" id="quit">${m==="practice"?"Menu":"Quit"}</button>`;
+  if(m==="practice"){
+    h=`<span class="pill">🎯 Practice</span><span class="pill">🔥 ${S.streak}</span><span class="sp"></span>${quit}`;
+    sub=`<div class="chips subhud">`+[["all","Mixed"],["fresh","Generated"],["basics","Basics"],["log","Log n"],["hidden","Hidden loops"],["rec","Recursion"]].map(([k,v])=>`<button class="chip${G.filter===k?" on":""}" data-f="${k}">${v}</button>`).join("")+`</div>`;
+  }else if(m==="blitz"){
+    h=`<span class="score">${G.score.toLocaleString()}</span><span class="combo">×${mult()}</span><span class="sp"></span><span class="pill">⏱ ${Math.ceil(G.time)}s</span>${quit}`;
+    sub=`<div class="tbar"><i class="${G.time<=10?"low":""}" style="width:${G.time/60*100}%"></i></div>`;
+  }else if(m==="survival"){
+    h=`<span class="hearts">${"❤️".repeat(G.hearts)}${"🖤".repeat(3-G.hearts)}</span><span class="pill">✅ ${G.correct}</span><span class="sp"></span><span class="pill">Level ${Math.min(4,1+Math.floor(G.count/4))}</span>${quit}`;
+  }else{
+    h=`<span class="pill">📅 ${Math.min(G.count+1,10)}/10</span><span class="pill">✅ ${G.correct}</span><span class="sp"></span>${quit}`;
+  }
+  $("hud").innerHTML=h;
+  if($("subhud").dataset.k!==m+G.filter||m==="blitz"){$("subhud").innerHTML=sub;$("subhud").dataset.k=m+G.filter;
+    $("subhud").querySelectorAll(".chip").forEach(b=>b.onclick=()=>{G.filter=b.dataset.f;renderHUD();nextQ();});}
+  $("quit").onclick=quit_;
+}
+function quit_(){
+  if(G.mode==="blitz"||G.mode==="survival"){if(G.count>0)return end();}
+  clearInterval(G.timer);G.mode=null;renderMenu();
+}
+
+// rendering helpers
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+const KW=/\b(for|foreach|in|while|if|elif|else|def|return|not|var|new|int|True|False)\b/g;
+function hl(line){let h=esc(line);h=h.replace(/\b(\d+)\b/g,'<span class="num">$1</span>');return h.replace(KW,'<span class="kw">$1</span>');}
+function md(s){return esc(s).replace(/`([^`]+)`/g,'<code class="i">$1</code>');}
+const costLines=q=>q.code.map((l,i)=>l[1]?i:-1).filter(i=>i>=0);
+
+function renderQ(){
+  const q=G.q,cl=costLines(q),shown=new Set(G.fb?cl:cl.slice(0,G.hints));
+  const lit=!G.answered&&G.hints>0?cl[G.hints-1]:-1;
+  let h=`<div class="meta"><span class="tag${q.fresh?" fresh":""}">${q.fresh?"✨ Generated":TOPICS[q.topic]}</span><span class="tag">${q.lang}</span></div>`;
+  h+=`<div class="code">`+q.code.map((l,i)=>`<div class="row${i===lit?" lit":""}"><span class="line">${hl(l[0])||" "}</span>${shown.has(i)?`<span class="cost">${esc(l[1])}</span>`:""}</div>`).join("")+`</div>`;
+  h+=`<div class="prompt">What's the Big O?</div><div class="choices">`+q.choices.map(k=>{
+    let c="";if(G.answered){if(k===q.a)c="right";else if(k===G.pick)c="wrong";}
+    return `<button data-k="${k}" class="${c}"${G.answered?" disabled":""}>${LBL[k]}</button>`;}).join("")+`</div>`;
+  if(!G.answered&&G.mode==="practice"){
+    h+=`<div class="actions"><button class="btn" id="hint"${G.hints>=cl.length?" disabled":""}>💡 Hint (${G.hints}/${cl.length})</button><button class="btn" id="skip">Skip</button></div>`;
+  }else if(G.fb){
+    const ok=G.pick===q.a;
+    const why=Array.isArray(q.why)?`<ul>${q.why.map(w=>`<li>${md(w)}</li>`).join("")}</ul>`:`<div>${md(q.why)}</div>`;
+    let btn="Next";
+    if(G.mode==="survival"&&G.hearts<=0)btn="See results";
+    if(G.mode==="daily"&&G.count>=10)btn="See results";
+    if(G.mode==="blitz")btn="Keep going ▶";
+    h+=`<div class="fb ${ok?"good":"bad"}"><div class="verdict">${ok?"Correct!":"Not quite. It's "+LBL[q.a]+"."}</div><div class="eq">${q.eq.map(esc).join("<br>")}</div>${why}</div>`+
+       `<div class="actions"><button class="btn primary" id="next">${btn}</button></div>`;
+  }
+  const card=$("qcard");card.innerHTML=h;
   card.querySelectorAll(".choices button").forEach(b=>b.onclick=()=>answer(b.dataset.k));
-  const hb=document.getElementById("hint");if(hb)hb.onclick=()=>{S.hints++;renderQ();};
-  const sb=document.getElementById("skip");if(sb)sb.onclick=nextQ;
-  const nb=document.getElementById("next");if(nb)nb.onclick=()=>{nextQ();window.scrollTo({top:0,behavior:"smooth"});};
+  const hb=$("hint");if(hb)hb.onclick=()=>{G.hints++;renderQ();};
+  const sb=$("skip");if(sb)sb.onclick=nextQ;
+  const nb=$("next");if(nb)nb.onclick=cont;
 }
 function answer(k){
-  if(S.answered)return;
-  const q=Q[S.idx];S.answered=true;S.pick=k;stats.total++;
-  if(k===q.a){stats.right++;stats.streak++;stats.best=Math.max(stats.best,stats.streak);}else stats.streak=0;
-  saveStats();renderStats();renderQ();
+  if(G.answered||G.lock)return;
+  const q=G.q,ok=k===q.a,card=$("qcard");
+  G.answered=true;G.pick=k;G.count++;S.totalAnswered++;
+  if(ok){
+    S.totalCorrect++;S.streak++;S.bestStreak=Math.max(S.bestStreak,S.streak);G.correct++;
+    if(/,[12]$/.test(q.a))S.logCorrect++;
+    if(q.hidden)S.hiddenCorrect++; if(q.topic==="rec")S.recCorrect++; if(q.fresh)S.freshCorrect++;
+    sfx.right();
+  }else{S.streak=0;sfx.wrong();if(navigator.vibrate)try{navigator.vibrate(80);}catch(e){}}
+  const m=G.mode;
+  if(m==="practice"){
+    if(ok)addXP(Math.max(2,10-3*G.hints));
+    G.fb=true;
+  }else if(m==="blitz"){
+    if(ok){G.combo++;const pts=100*mult();G.score+=pts;G.lock=true;renderHUD();renderQ();floatText("+"+pts);animate(card,"pop");setTimeout(()=>{if(G.mode==="blitz"&&G.time>0)nextQ();},450);save();checkAch();return;}
+    G.combo=0;G.time=Math.max(0,G.time-5);G.paused=true;G.fb=true;
+  }else if(m==="survival"){
+    if(ok){G.lock=true;renderHUD();renderQ();floatText("+1");animate(card,"pop");setTimeout(()=>{if(G.mode==="survival")nextQ();},450);save();checkAch();return;}
+    G.hearts--;G.fb=true;
+  }else{G.fb=true;}
+  if(!ok)animate(card,"shake");else{animate(card,"pop");floatText(m==="daily"?"+20 XP":"✓");}
+  renderHUD();renderQ();save();checkAch();
+}
+function cont(){
+  const m=G.mode;
+  if(m==="survival"&&G.hearts<=0)return end();
+  if(m==="daily"&&G.count>=10)return end();
+  if(m==="blitz"){G.paused=false;if(G.time<=0)return end();}
+  nextQ();
+}
+function end(){
+  clearInterval(G.timer);const m=G.mode;G.mode=null;
+  let ico="🏁",big="",label="",newBest=false,xp=0,extra="";
+  const acc=G.count?Math.round(G.correct/G.count*100):0;
+  if(m==="blitz"){ico="⚡";big=G.score.toLocaleString();label="points";xp=G.score/10;if(G.score>S.blitzBest){newBest=S.blitzBest>0||G.score>0;S.blitzBest=G.score;}}
+  else if(m==="survival"){ico="❤️";big=G.correct;label="right before running out of lives";xp=G.correct*15;if(G.correct>S.survivalBest){newBest=true;S.survivalBest=G.correct;}}
+  else if(m==="daily"){
+    ico="📅";big=`${G.correct}/10`;label="today's daily";xp=G.correct*20+(G.correct===10?50:0);
+    const t=dstr();if(S.dailyLast!==t){S.dailyStreak=S.dailyLast===yesterday()?S.dailyStreak+1:1;S.dailyStreakBest=Math.max(S.dailyStreakBest,S.dailyStreak);S.dailyDone++;}
+    S.dailyLast=t;S.dailyScore=G.correct;if(G.correct===10)S.dailyPerfect++;
+    extra=`<p class="muted">🔥 Daily streak: ${S.dailyStreak} day${S.dailyStreak>1?"s":""}. New set tomorrow.</p>`;
+  }
+  save();addXP(xp);checkAch();
+  if(newBest){confetti();tone([523,784,1047],0.1);}
+  $("end").innerHTML=`<div class="ico">${ico}</div><div class="big">${big}</div><div class="muted">${label}</div>${newBest?`<div class="newbest">🏆 New best!</div>`:""}
+    <div class="statrow"><div><b>${G.correct}/${G.count}</b>right</div><div><b>${acc}%</b>accuracy</div><div><b>+${Math.round(xp)}</b>XP</div></div>${extra}
+    <div class="actions">${m!=="daily"?`<button class="btn primary" id="again">Play again</button>`:""}<button class="btn" id="tomenu">Menu</button></div>`;
+  show("end");
+  const a=$("again");if(a)a.onclick=()=>start(m);
+  $("tomenu").onclick=renderMenu;
 }
 
-// ---------- tracer ----------
+// ================= badges tab =================
+function renderBadges(){
+  const acc=S.totalAnswered?Math.round(S.totalCorrect/S.totalAnswered*100):0;
+  $("profile").innerHTML=[["Level",level(S.xp)],["XP",S.xp.toLocaleString()],["Accuracy",acc+"%"],["Correct",S.totalCorrect],["Best streak",S.bestStreak],["Daily streak",S.dailyStreak],
+    ["Blitz best",S.blitzBest.toLocaleString()],["Survival best",S.survivalBest],["Dailies",S.dailyDone]].map(([k,v])=>`<div><b>${v}</b>${k}</div>`).join("");
+  const got=ACH.filter(a=>S.ach[a[0]]).length;
+  $("badgeCount").textContent=`${got}/${ACH.length}`;
+  $("badgeGrid").innerHTML=ACH.map(([id,e,n,d])=>`<div class="badge${S.ach[id]?"":" locked"}"><span class="e">${e}</span><b>${n}</b><span class="muted">${d}</span></div>`).join("");
+}
+
+// ================= learn tab =================
 const OPS={
   add1:{start:"0",cond:"i < n",upd:"i = i + 1",init:n=>0,test:(i,n)=>i<n,step:i=>i+1},
   add2:{start:"0",cond:"i < n",upd:"i = i + 2",init:n=>0,test:(i,n)=>i<n,step:i=>i+2},
@@ -320,50 +708,51 @@ const OPS={
   div3:{start:"n",cond:"i > 1",upd:"i = i // 3",init:n=>n,test:(i,n)=>i>1,step:i=>Math.floor(i/3)}
 };
 function renderTracer(){
-  const op=OPS[document.getElementById("tOp").value];
-  let n=parseInt(document.getElementById("tN").value,10);if(!(n>=1))n=1;if(n>1000000)n=1000000;
-  document.getElementById("tCode").innerHTML=[`i = ${op.start}`,`while ${op.cond}:`,`    ${op.upd}`].map(l=>`<div class="row"><span class="line">${hl(l)}</span></div>`).join("");
+  const op=OPS[$("tOp").value];
+  let n=parseInt($("tN").value,10);if(!(n>=1))n=1;if(n>1000000)n=1000000;
+  $("tCode").innerHTML=[`i = ${op.start}`,`while ${op.cond}:`,`    ${op.upd}`].map(l=>`<div class="row"><span class="line">${hl(l)}</span></div>`).join("");
   const vals=[];let i=op.init(n),passes=0;
   while(op.test(i,n)){vals.push(i);i=op.step(i);passes++;}
-  let seq;
-  if(vals.length<=30)seq=vals.join(" → ");
-  else seq=vals.slice(0,15).join(" → ")+" → … → "+vals.slice(-5).join(" → ");
-  document.getElementById("tSeq").textContent=vals.length?"i: "+seq:"(the loop never runs)";
-  const lg=Math.log2(n);
+  const seq=vals.length<=30?vals.join(" → "):vals.slice(0,15).join(" → ")+" → … → "+vals.slice(-5).join(" → ");
+  $("tSeq").textContent=vals.length?"i: "+seq:"(the loop never runs)";
   const kind=op.upd.includes("+")?"walking, so it grows with n → O(n)":"jumping, so it grows with log n → O(log n)";
-  document.getElementById("tOut").innerHTML=`<div class="big">${passes.toLocaleString()} passes</div>`+
-    `<div class="muted">For comparison: n = ${n.toLocaleString()}, log₂ n ≈ ${lg.toFixed(1)}</div>`+
-    `<p style="margin-bottom:0">This loop is ${kind}. Try doubling n and see how much the pass count changes.</p>`;
+  $("tOut").innerHTML=`<div class="bigtxt">${passes.toLocaleString()} passes</div><div class="muted">For comparison: n = ${n.toLocaleString()}, log₂ n ≈ ${Math.log2(n).toFixed(1)}</div><p style="margin-bottom:0">This loop is ${kind}. Try doubling n and see how much the pass count changes.</p>`;
 }
-
-// ---------- doubling ----------
-function steps(k,n){return k==="1"?1:k==="logn"?Math.log2(n):k==="n"?n:k==="nlogn"?n*Math.log2(n):k==="n2"?n*n:Math.pow(2,n);}
+const DKEYS=["0,0","0,1","1,0","1,1","2,0","exp"];
+function steps(k,n){return k==="0,0"?1:k==="0,1"?Math.log2(n):k==="1,0"?n:k==="1,1"?n*Math.log2(n):k==="2,0"?n*n:Math.pow(2,n);}
 function fmt(k,n){
-  if(k==="2n"&&n>50)return "≈ 10^"+Math.round(n*Math.log10(2));
+  if(k==="exp"&&n>50)return "≈ 10^"+Math.round(n*Math.log10(2));
   const v=steps(k,n);
   if(v>=1e12)return "≈ "+(v/1e12).toLocaleString(undefined,{maximumFractionDigits:1})+" trillion";
   return v.toLocaleString(undefined,{maximumFractionDigits:v<100?1:0});
 }
-const GROW={"1":"same","logn":"+1 step","n":"×2","nlogn":"a bit over ×2","n2":"×4","2n":"squared!"};
+const GROW={"0,0":"same","0,1":"+1 step","1,0":"×2","1,1":"a bit over ×2","2,0":"×4","exp":"squared!"};
 function renderDoubling(){
-  const n=parseInt(document.getElementById("dN").value,10);
-  document.getElementById("dTable").innerHTML=`<thead><tr><th></th><th>n = ${n.toLocaleString()}</th><th>n = ${(2*n).toLocaleString()}</th><th>Change</th></tr></thead><tbody>`+
-    ORDER.map(k=>`<tr><td><b>${LABEL[k]}</b></td><td>${fmt(k,n)}</td><td>${fmt(k,2*n)}</td><td>${GROW[k]}</td></tr>`).join("")+"</tbody>";
+  const n=parseInt($("dN").value,10);
+  $("dTable").innerHTML=`<thead><tr><th></th><th>n = ${n.toLocaleString()}</th><th>n = ${(2*n).toLocaleString()}</th><th>Change</th></tr></thead><tbody>`+
+    DKEYS.map(k=>`<tr><td><b>${LBL[k]}</b></td><td>${fmt(k,n)}</td><td>${fmt(k,2*n)}</td><td>${GROW[k]}</td></tr>`).join("")+"</tbody>";
 }
+const CHEAT=[["Get by index","list[i]","list[i]","O(1)"],["Length","len(list)","list.Count","O(1)"],["Add to end","list.append(x)","list.Add(x)","O(1)"],
+["Remove from end","list.pop()","RemoveAt(Count-1)","O(1)"],["Remove from front","list.pop(0)","RemoveAt(0)","O(n)"],["Insert at front","list.insert(0, x)","Insert(0, x)","O(n)"],
+["Search a list","x in list","list.Contains(x)","O(n)"],["Search a set","x in set","hashSet.Contains(x)","O(1)"],["Dictionary lookup","d[key]","dict[key]","O(1)"],
+["Max / min / sum","max(list)","list.Max()","O(n)"],["Sort","list.sort()","list.Sort()","O(n log n)"],["Copy a list","list[:]","list.ToList()","O(n)"],
+["Count a lazy sequence","—","items.Count()","O(n)"],["Build a set","set(list)","new HashSet<T>(list)","O(n)"]];
+$("cheatBody").innerHTML=CHEAT.map(r=>`<tr><td>${r[0]}</td><td><code>${esc(r[1])}</code></td><td><code>${esc(r[2])}</code></td><td><b>${r[3]}</b></td></tr>`).join("");
 
-// ---------- cheat sheet ----------
-document.getElementById("cheatBody").innerHTML=CHEAT.map(r=>`<tr><td>${r[0]}</td><td><code>${esc(r[1])}</code></td><td><code>${esc(r[2])}</code></td><td><b>${r[3]==="1"?"O(1)":"O("+r[3]+")"}</b></td></tr>`).join("");
-
-// ---------- tabs ----------
+// ================= wiring =================
 document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>{
   document.querySelectorAll("#tabs button").forEach(x=>x.classList.toggle("on",x===b));
-  document.querySelectorAll("section").forEach(s=>s.classList.toggle("hide",s.id!==b.dataset.tab));
+  ["play","learn","badges"].forEach(s=>$(s).classList.toggle("hide",s!==b.dataset.tab));
+  if(b.dataset.tab==="badges")renderBadges();
 });
-document.getElementById("tOp").onchange=renderTracer;
-document.getElementById("tN").oninput=renderTracer;
-document.getElementById("dN").onchange=renderDoubling;
-
-renderFilters();renderStats();nextQ();renderTracer();renderDoubling();
+document.querySelectorAll("#learnChips .chip").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("#learnChips .chip").forEach(x=>x.classList.toggle("on",x===b));
+  document.querySelectorAll(".lsec").forEach(s=>s.classList.toggle("hide",s.id!=="l-"+b.dataset.l));
+});
+$("snd").onclick=()=>{S.sound=!S.sound;save();renderTop();if(S.sound)sfx.right();};
+$("resetAll").onclick=()=>{if(confirm("Reset all XP, badges and bests?")){S=Object.assign({},DEF,{ach:{},sound:S.sound});save();renderTop();renderBadges();renderMenu();}};
+$("tOp").onchange=renderTracer;$("tN").oninput=renderTracer;$("dN").onchange=renderDoubling;
+renderTop();renderMenu();renderTracer();renderDoubling();
 </script>
 </body>
 </html>
